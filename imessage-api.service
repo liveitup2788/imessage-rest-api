@@ -1,0 +1,18 @@
+[Unit]
+Description=iMessage REST API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=opc
+Environment=RUST_LOG=info
+Environment=IMESSAGE_DATA_DIR=/home/opc/.var/app/app.openbubbles.OpenBubbles/data/bluebubbles
+Environment=IMESSAGE_API_KEY=CHANGE_ME
+Environment=IMESSAGE_API_PORT=8787
+ExecStart=/usr/local/bin/imessage-api
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
