@@ -76,21 +76,43 @@ After this step, your Mac is no longer needed.
 
 ### 4. Build imessage-rest-api
 
+This project depends on `rustpush`, which includes private Apple FairPlay certificates in a private submodule (`apple-private-apis`). Because of this, the build must happen inside the `openbubbles-app` source tree.
+
+#### Step 1: Clone openbubbles-app with submodules
+
 ```bash
-# Clone the OpenBubbles app (includes rustpush as a submodule)
 git clone --recurse-submodules https://github.com/OpenBubbles/openbubbles-app.git
 cd openbubbles-app
 git checkout rustpush
+git submodule update --init --recursive
+```
 
-# Clone this project into the repo (it depends on ../rustpush)
-git clone https://github.com/YOUR_USERNAME/imessage-rest-api.git
+**If the submodule fetch fails** with a permission error, the `apple-private-apis` submodule is a private repo. You'll need to:
+1. Join the [OpenBubbles Discord](https://discord.gg/openbubbles) and request access
+2. Or ask a maintainer to grant you access to [`OpenBubbles/apple-private-apis`](https://github.com/OpenBubbles/apple-private-apis)
+
+You can verify the submodules are present by checking that `rustpush/certs/fairplay/` contains `.crt` and `.pem` files.
+
+#### Step 2: Clone and build this project
+
+```bash
+# From inside openbubbles-app/
+git clone https://github.com/liveitup2788/imessage-rest-api.git
 cd imessage-rest-api
 cargo build --release
 ```
 
-The project must live inside the `openbubbles-app/` directory because it depends on `../rustpush` (which contains private Apple certificates that can't be distributed via a standalone git dependency).
+The project must live inside `openbubbles-app/` because `Cargo.toml` uses `path = "../rustpush"` — the private certificates can't be distributed via a standalone git dependency.
 
 The first build takes a few minutes (compiling rustpush and all its dependencies).
+
+#### Troubleshooting Build Issues
+
+| Error | Fix |
+|-------|-----|
+| `certs/fairplay/` is empty or missing | Submodules not initialized. Run `git submodule update --init --recursive` from `openbubbles-app/` |
+| Permission denied fetching `apple-private-apis` | Private repo — request access via OpenBubbles Discord |
+| SSH key errors on submodule fetch | Run `git config --global url."https://github.com/".insteadOf "git@github.com:"` to use HTTPS instead |
 
 ### 5. Run
 
